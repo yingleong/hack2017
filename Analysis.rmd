@@ -1,0 +1,66 @@
+---
+title: "DHLHackathon2017"
+author: "Ying Leong, Woo"
+date: "November 3, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Environment Setup
+
+Download the [file](https://www.dropbox.com/sh/bh9narqilk68f11/AADl8zBFj2a2C-Pg4B9ijtnma/fullset%20%28final%29.zip?dl=0) and unzip it based on the password given.
+
+## Loading required libraries
+```{r load-library}
+library(ggplot2)
+library(scatterplot3d)
+source('http://www.sthda.com/sthda/RDoc/functions/addgrids3d.r')
+
+```
+
+## Loading Data
+### Original Data
+```{r loading-data, cache=TRUE}
+if(!file.exists("./data")){
+  stop("Data must be pre-setup in the data folder")
+}
+
+orig_pmr<-read.csv("./data/project_dc_pmr.csv")
+orig_risk<-read.csv("./data/project_dc_risk.csv")
+orig_sensor<-read.csv("./data/project_dc_sensoronly.csv")
+orig_therapeutic<-read.csv("./data/project_dc_therapeutic.csv")
+```
+
+### Analysis Data
+```{r analysis-data, cache=TRUE}
+#base_shp_dev<-orig_risk[,c('ShipmentID','ShipmentDeviation', 'TransitTime_hrs','PackagingClassification', 'ServiceLevel')]
+#shp_patterns<-orig_pmr[,c('ShipmentID','TradeLanePlannedTransitTime','ActualWeight')]
+#pmr_risk<-merge(base_shp_dev,shp_patterns)
+pmr_risk<-orig_risk[,c('PackagingClassification', 'ServiceLevel','TransitTime_hrs','ShipmentDeviation','ShipmentID')]
+```
+
+#Exploratory Analysis
+## Shipment Deviation over the Weight and Quantity of Shipments
+```{r shp-deviation-distribution}
+qplot(PackagingClassification, TransitTime_hrs,data=pmr_risk, main="Shipment Deviation Distribution", ylab="TransitTime_hrs", xlab="PackagingClassification", colour=ShipmentDeviation)
+
+pmr_risk$DevColor<-ifelse(is.na(pmr_risk$ShipmentDeviation),1, as.numeric(pmr_risk$ShipmentDeviation)+2)
+
+colors <- c("gray", "green", "red")
+colors <- colors[as.numeric(pmr_risk$DevColor)]
+attach(pmr_risk)
+
+scatterplot3d(pmr_risk[,1:3], color = colors, pch=16)
+
+#legend("bottom", legend = levels(pmr_risk$DevColor), col = c("#999999", "#E69F00", "#56B4E9"), pch = 16)
+
+
+#summary(pmr_risk$DevColor)
+#dimension(orig_risk$DevColor)
+```
+
+
+
